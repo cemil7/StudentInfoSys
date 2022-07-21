@@ -13,17 +13,17 @@ namespace Student_Information_System
 {
     public partial class GetDatabase
     {
-        SqlConnection baglanti;
-        SqlCommand komut;
+        SqlConnection connection;
+        SqlCommand cmd;
         SqlDataAdapter da;
-        public void BilgileriGetir()
+        public void getInfos()
         {
-            baglanti = new SqlConnection("Server=localhost=SQLEXPRESS;Database=master;Trusted_Connection=True;");
-            baglanti.Open();
-            da = new SqlDataAdapter("Select *From tblKisiler", baglanti);
-            DataTable tablo = new DataTable();
-            da.Fill(tablo);
-            baglanti.Close();
+            connection = new SqlConnection("Server=localhost=SQLEXPRESS;Database=master;Trusted_Connection=True;");
+            connection.Open();
+            da = new SqlDataAdapter("Select *From tblStudents", connection);
+            DataTable table = new DataTable();
+            da.Fill(table);
+            connection.Close();
         }
     }
 }

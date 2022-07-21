@@ -15,32 +15,34 @@ namespace Student_Information_System
         SqlCommand cmd = null;
 
         public List<Student> students = new List<Student>();
-        int islem;
-        public void ekle()
+        int process;
+        public void add()
         {
+
+
 
             Student student = new Student();
 
             student.name = readlineCem(1);
             student.surname = readlineCem(2);
             student.gender = readlineCem(4);
-            veriEkle(student);
-            islemKontrol();
+            dataAdd(student);
+            processControl();
         }
-        public void sil()
+        public void remove()
         {
             Student student = new Student();
-            int removeId=-1;
+            int removeId = -1;
             string IdString = readlineCem(5);
-            int controledInt = idKontrol(IdString);
-            
-           
+            int controledInt = idControl(IdString);
+
+
             if (controledInt > -1)
             {
                 removeId = controledInt;
             }
-            int studentIndex = countOgrenci(removeId);
-             
+            int studentIndex = countStudents(removeId);
+
             if (studentIndex > 0)
             {
                 conn = new SqlConnection(connString);
@@ -50,120 +52,131 @@ namespace Student_Information_System
                 cmd.CommandText = "DELETE FROM STUDENT_INFO_TABLE WHERE STUDENT_ID=" + removeId;
                 cmd.ExecuteNonQuery();
                 conn.Close();
-                listele();
+                show();
             }
             else
             {
-                Console.WriteLine("Hatalı Öğrenci Numarası Girdiniz..\n");
+                Console.WriteLine("You Entered Wrong Student Number..\n");
             }
-            islemKontrol();
+            processControl();
 
         }
-        public int cikis()
+        public int exit()
         {
 
             return -1;
         }
-        public void listele()
+        public void show()
         {
-            conn = new SqlConnection(connString);
-            conn.Open();
-            cmd = new SqlCommand();
-            cmd.Connection = conn;
-            cmd.CommandText = "Select * FROM STUDENT_INFO_TABLE";
-            using (SqlDataReader reader = cmd.ExecuteReader())
+            try
             {
-                Console.WriteLine("Sisteme Kayıtlı Öğrenci Bilgileri..");
-                while (reader.Read())
+                conn = new SqlConnection(connString);
+                conn.Open();
+                cmd = new SqlCommand();
+                cmd.Connection = conn;
+                cmd.CommandText = "Select * FROM STUDENT_INFO_TABLE";
+                using (SqlConnection connection = new SqlConnection(connString))
                 {
-                    
-                    Console.WriteLine("---------------------------------------");
-                   
-                    Console.Write("Student Id: ");     Console.WriteLine(reader["Student_Id"].ToString());
-                    Console.Write("Student Name: ");   Console.WriteLine(reader["Student_Name"].ToString());
-                    Console.Write("Student Surname: ");Console.WriteLine(reader["Student_Surname"].ToString());
-                    Console.Write("Student Gender: "); Console.WriteLine(reader["Student_Gender"].ToString());
-                }
-                
-            }
-            conn.Close();
-            Console.WriteLine();
-            ogrenciSayisi();
-            islemKontrol();
+                    SqlDataAdapter da = new SqlDataAdapter("select * from Student_Info_Table", connection);
 
-        }   
-       public void veriEkle(Student student)
+                    //Using Data Table
+                    DataTable dt = new DataTable();
+                    da.Fill(dt);
+                    Console.WriteLine("Using Data Table");
+
+                    for (int i = 0; i < dt.Rows.Count; i++)
+                    {
+                        Console.WriteLine(dt.Rows[i]["Student_Id"].ToString() + " " + dt.Rows[i]["Student_Name"].ToString() + " " + dt.Rows[i]["Student_Surname"].ToString() + " " + dt.Rows[i]["Student_Gender"].ToString());
+                    }
+                    Console.WriteLine("-----------------------------");
+                }
+
+                conn.Close();
+                Console.WriteLine();
+                numberofStudents();
+
+                addObject();
+                processControl();
+
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("OOPs, something went wrong.\n" + e);
+            }
+            Console.ReadKey();
+        }
+        public void dataAdd(Student student)
         {
             conn = new SqlConnection(connString);
             conn.Open();
             cmd = new SqlCommand();
             cmd.Connection = conn;
-            cmd.CommandText = "INSERT INTO STUDENT_INFO_TABLE( Student_Name, Student_Surname, Student_Gender) VALUES ('"+student.name+"','"+student.surname+"','"+student.gender+"')"; 
+            cmd.CommandText = "INSERT INTO STUDENT_INFO_TABLE( Student_Name, Student_Surname, Student_Gender) VALUES ('" + student.name + "','" + student.surname + "','" + student.gender + "')";
             cmd.ExecuteNonQuery();
             conn.Close();
-            listele();
-            islemKontrol();
+            show();
+            processControl();
 
         }
-        public void islemKontrol()
+        public void processControl()
         {
-            
-
-            string isIslemNull = readlineCem(8);
 
 
+            string isProcessNull = readlineCem(8);
 
-            if (isIslemNull != "")
+
+
+            if (isProcessNull != "")
             {
-                bool tryParse = Int32.TryParse(isIslemNull, out islem);
+                bool tryParse = Int32.TryParse(isProcessNull, out process);
                 if (tryParse)
                 {
 
                 }
                 else
                 {
-                    Console.WriteLine("Yanlış format. Tekrar Deneyin");
+                    Console.WriteLine("Wrong format. Try again");
                 }
 
 
             }
             else
             {
-                islem = 0;
+                process = 0;
             }
 
 
 
-            if (islem == 1)
+            if (process == 1)
             {
-                listele();
+                show();
 
             }
-            else if (islem == 2)
+            else if (process == 2)
             {
-                ekle();
+                add();
             }
-            else if (islem == 3)
+            else if (process == 3)
             {
-                sil();
+                remove();
             }
-            else if (islem == 4)
+            else if (process == 4)
             {
-                ogrenciGuncelleme();
+                updateStudents();
             }
-            else if (islem == 5)
+            else if (process == 5)
             {
-                cikis();
+                exit();
             }
 
 
             else
             {
-                Console.Write("Hatalı İşlem Kodunu Girdiniz...\n\n");
-                islemKontrol();
+                Console.Write("You Entered Wrong Transaction Code...\n\n");
+                processControl();
             }
         }
-        public void ogrenciSayisi()
+        public void numberofStudents()
         {
             conn = new SqlConnection(connString);
             conn.Open();
@@ -171,38 +184,38 @@ namespace Student_Information_System
             cmd.Connection = conn;
 
             cmd.CommandText = "SELECT COUNT (*) AS [STUDENT_ID] FROM STUDENT_INFO_TABLE";
-            var cikti=cmd.ExecuteScalar();
-            Console.WriteLine("Sistemde Kayıtlı Ogrenci Sayısı: "+cikti);
+            var value = cmd.ExecuteScalar();
+            Console.WriteLine("Number of Students Registered in the System: " + value);
             Console.WriteLine();
             conn.Close();
 
         }
-        public int countOgrenci(int countID)
+        public int countStudents(int countID)
         {
-            
-            conn=new SqlConnection(connString);
+
+            conn = new SqlConnection(connString);
             conn.Open();
-            cmd=new SqlCommand();
+            cmd = new SqlCommand();
             cmd.Connection = conn;
-            cmd.CommandText="SELECT COUNT (*) AS [STUDENT_ID] FROM STUDENT_INFO_TABLE WHERE STUDENT_ID=" +countID;
-            var count=cmd.ExecuteScalar();
+            cmd.CommandText = "SELECT COUNT (*) AS [STUDENT_ID] FROM STUDENT_INFO_TABLE WHERE STUDENT_ID=" + countID;
+            var count = cmd.ExecuteScalar();
             conn.Close();
             return Convert.ToInt32(count);
-            
+
 
         }
-        public void ogrenciGuncelleme()
+        public void updateStudents()
         {
-            int removeId=-1;
+            int removeId = -1;
 
             string IdString = readlineCem(6);
-            int controledInt = idKontrol(IdString);
+            int controledInt = idControl(IdString);
             if (controledInt > -1)
             {
                 removeId = controledInt;
 
             }
-            int studentIndex = countOgrenci(removeId);
+            int studentIndex = countStudents(removeId);
             if (studentIndex > 0)
             {
                 Student student = new Student();
@@ -210,27 +223,27 @@ namespace Student_Information_System
                 student.name = readlineCem(1);
                 student.surname = readlineCem(2);
                 student.gender = readlineCem(4);
-                conn= new SqlConnection(connString);
+                conn = new SqlConnection(connString);
                 conn.Open();
-                cmd=new SqlCommand();
+                cmd = new SqlCommand();
                 cmd.Connection = conn;
 
-               
 
-                cmd.CommandText = "UPDATE STUDENT_INFO_TABLE SET Student_Name = '" + student.name +"', "+ " Student_Surname = '" + student.surname +"', "+ " Student_Gender = '" + student.gender + "' WHERE Student_Id= " +removeId;
+
+                cmd.CommandText = "UPDATE STUDENT_INFO_TABLE SET Student_Name = '" + student.name + "', " + " Student_Surname = '" + student.surname + "', " + " Student_Gender = '" + student.gender + "' WHERE Student_Id= " + removeId;
                 cmd.ExecuteNonQuery();
                 conn.Close();
-                listele();
+                show();
             }
             else
             {
-                Console.WriteLine("Hatalı Öğrenci Numarası Girdiniz..\n");
+                Console.WriteLine("You Entered Wrong Student Number..\n");
 
             }
 
-            islemKontrol();
+            processControl();
         }
-        public int idKontrol(string isIdNull)
+        public int idControl(string isIdNull)
         {
             int _id = -1;
             if (isIdNull != "")
@@ -245,7 +258,7 @@ namespace Student_Information_System
 
                     isIdNull = readlineCem(9);
 
-                    int controledInt = idKontrol(isIdNull);
+                    int controledInt = idControl(isIdNull);
                     if (controledInt > -1)
                     {
                         return controledInt;
@@ -254,35 +267,35 @@ namespace Student_Information_System
             }
             return _id;
         }
-        public string readlineCem(int tur)
+        public string readlineCem(int round)
         {
             string rValue = "";
 
-            switch (tur)
+            switch (round)
             {
                 case 1:
-                    Console.WriteLine("Eklemek İstediğiniz Öğrencinin Adını Girin: ");
+                    Console.WriteLine("Enter the Name of the Student You Want to Add: ");
                     break;
                 case 2:
-                    Console.WriteLine("Eklemek İstediğiniz Öğrencinin Soyadını Girin: ");
+                    Console.WriteLine("Enter the Surname of the Student You Want to Add: ");
                     break;
                 case 4:
-                    Console.WriteLine("Eklemek İstediğiniz Öğrencinin Cinsiyetini Girin: ");
+                    Console.WriteLine("Enter the Gender of the Student You Want to Add: ");
                     break;
                 case 5:
-                    Console.WriteLine("Silmek İstediğiniz Öğrencinin Numarasını Girin: ");
+                    Console.WriteLine("Enter the Id of the Student You Want to Delete: ");
                     break;
                 case 6:
-                    Console.WriteLine("Güncellemek İstediğiniz Öğrencinin Numarasını Girin: ");
+                    Console.WriteLine("Enter the Id of the Student You Want to Update: ");
                     break;
                 case 7:
-                    Console.WriteLine("Bu numarada bir öğrenci var.Lütfen Tekrar deneyin");
+                    Console.WriteLine("There is a student at this number. Please try again");
                     break;
                 case 8:
-                    Console.WriteLine("Hangi İşlemi Yapmak İstiyorsun.. \n 1-Listele 2-Ekle 3-Sil 4-Güncelleme 5-Cikis \n\n");
+                    Console.WriteLine("Which Operation Do You Want To Do?.. \n 1-List 2-Add 3-Remove 4-Update 5-Exit \n\n");
                     break;
                 case 9:
-                    Console.WriteLine("Yanlış format.Tekrar Deneyin");
+                    Console.WriteLine("Wrong format.Try again.");
                     break;
 
 
@@ -292,12 +305,32 @@ namespace Student_Information_System
             if (rValue.Replace(" ", "") == "")
             {
 
-                rValue = readlineCem(tur);
+                rValue = readlineCem(round);
             }
 
 
 
             return rValue;
+        }
+
+        public void addObject()
+        {
+            students.Clear();
+            SqlConnection conn = new SqlConnection(connString);
+            SqlCommand cmd = new SqlCommand("Select * from STUDENT_INFO_TABLE", conn);
+            conn.Open();
+            SqlDataReader dr = cmd.ExecuteReader();
+            while (dr.Read())
+            {
+                Student student = new Student();
+                student.id = Convert.ToInt32(dr["Student_Id"].ToString());
+                student.name = dr["Student_Name"].ToString();
+                student.surname = dr["Student_Surname"].ToString();
+                student.gender = dr["Student_Gender"].ToString();
+                students.Add(student);
+            }
+            conn.Close();
+
         }
 
     }
