@@ -15,7 +15,6 @@ namespace Student_Information_System
         SqlCommand cmd = null;
 
         public List<Student> students = new List<Student>();
-        Lesson lesson = new Lesson();
         int process;
         int Lessonprocess;
         public void add()
@@ -70,11 +69,7 @@ namespace Student_Information_System
         {
             try
             {
-                conn = new SqlConnection(connString);
-                conn.Open();
-                cmd = new SqlCommand();
-                cmd.Connection = conn;
-                cmd.CommandText = "Select * FROM STUDENT_INFO_TABLE";
+
                 using (SqlConnection connection = new SqlConnection(connString))
                 {
                     SqlDataAdapter da = new SqlDataAdapter("select * from Student_Info_Table", connection);
@@ -94,7 +89,6 @@ namespace Student_Information_System
                     Console.WriteLine("-----------------------------");
                 }
 
-                conn.Close();
                 Console.WriteLine();
                 numberofStudents();
 
@@ -207,6 +201,17 @@ namespace Student_Information_System
 
 
         }
+        public int countLessons(int countLesson)
+        {
+            conn = new SqlConnection(connString);
+            conn.Open();
+            cmd = new SqlCommand();
+            cmd.Connection = conn;
+            cmd.CommandText = "SELECT COUNT (*) AS [LESSON_ID] FROM LESSON_TABLE WHERE LESSON_ID=" + countLesson;
+            var count = cmd.ExecuteScalar();
+            conn.Close();
+            return Convert.ToInt32(count);
+        }
         public void updateStudents()
         {
             int removeId = -1;
@@ -304,19 +309,23 @@ namespace Student_Information_System
                     Console.WriteLine("Enter the code of the student's lesson:  ");
                     getLessonId();
                     break;
-
                 case 11:
                     Console.WriteLine("Enter the Id of the Student You Want to Enroll in the Lesson: ");
                     break;
                 case 12:
-                    Console.WriteLine("Which Operation Do You Want To Do?.. \n 1-Adding the Student to the Lesson 2-Deleting a Student from a Lesson 3-Main Menu 4-Exit");
+                    Console.WriteLine("Which Operation Do You Want To Do?.. \n 1-Adding the Student to the Lesson 2-Deleting a Student from a Lesson 3-Updating the Course Quota 4-Show Students Taking the Lesson 5-Main Menu 6-Exit");
                     break;
                 case 13:
                     Console.WriteLine("Enter the Id of the Student to be Deleted from the Lesson:");
-                        break;
+                    break;
                 case 14:
                     Console.WriteLine("Enter the Lesson Id:");
                     break;
+                case 15:
+                    Console.WriteLine("Enter the new quota: ");
+                    break;
+
+
             }
             rValue = Console.ReadLine();
 
@@ -328,7 +337,6 @@ namespace Student_Information_System
 
             return rValue;
         }
-
         public void addObject()
         {
             students.Clear();
@@ -348,7 +356,6 @@ namespace Student_Information_System
             conn.Close();
 
         }
-
         public int quotaCount(int lessonId)
         {
             conn = new SqlConnection(connString);
@@ -382,8 +389,6 @@ namespace Student_Information_System
             }
 
         }
-
-
         public void showLesson()
         {
             try
@@ -422,7 +427,6 @@ namespace Student_Information_System
 
             lessonProcess();
         }
-
         public void addToLesson()
         {
             int studentId = Convert.ToInt32(readlineCem(11));
@@ -448,7 +452,6 @@ namespace Student_Information_System
 
 
         }
-
         public void lessonProcess()
         {
             string isProcessNull = readlineCem(12);
@@ -482,16 +485,22 @@ namespace Student_Information_System
             }
             else if (Lessonprocess == 3)
             {
-                processControl();
+                uptadeLessonQuota();
             }
             else if (Lessonprocess == 4)
             {
+                showStudentLesson();
+            }
+            else if (Lessonprocess == 5)
+            {
+                processControl();
+            }
+            else if (Lessonprocess == 6)
+            {
                 exit();
             }
-            
+
         }
-
-
         public void getLessonId()
 
         {
@@ -513,7 +522,8 @@ namespace Student_Information_System
 
 
         }
-        public void removeToLesson() {
+        public void removeToLesson()
+        {
             int studentId = Convert.ToInt32(readlineCem(13));
             int lessonId = Convert.ToInt32(readlineCem(14));
             int removeId = -1;
@@ -523,15 +533,15 @@ namespace Student_Information_System
             {
                 removeId = controledInt;
             }
-            int studentIndex = countStudents(removeId);
+            int LessonIndex = countLessons(removeId);
 
-            if (studentIndex > 0)
+            if (LessonIndex > 0)
             {
                 conn = new SqlConnection(connString);
                 conn.Open();
                 cmd = new SqlCommand();
                 cmd.Connection = conn;
-                cmd.CommandText = "DELETE FROM StudentLessons WHERE STUDENT_ID=" + removeId + "AND Lesson_Id="+lessonId;
+                cmd.CommandText = "DELETE FROM StudentLessons WHERE STUDENT_ID=" + removeId + "AND Lesson_Id=" + lessonId;
                 cmd.ExecuteNonQuery();
                 conn.Close();
                 Console.WriteLine("Student Deleted..");
@@ -548,8 +558,97 @@ namespace Student_Information_System
 
         }
 
+        public void uptadeLessonQuota()
+        {
+
+            int lessonId = Convert.ToInt32(readlineCem(14));
+            int newQuota = Convert.ToInt32(readlineCem(15));
+
+            int removeId = -1;
+            int controledInt = idControl(Convert.ToString(lessonId));
+            if (controledInt > -1)
+            {
+                removeId = controledInt;
+            }
+            int LessonIndex = countLessons(removeId);
+
+            if (LessonIndex > 0)
+            {
+                conn = new SqlConnection(connString);
+                conn.Open();
+                cmd = new SqlCommand();
+                cmd.Connection = conn;
+                cmd.CommandText = "UPDATE Lesson_Table SET Lesson_Quota=" + newQuota + "WHERE Lesson_Id=" + lessonId;
+                cmd.ExecuteNonQuery();
+                conn.Close();
+                Console.WriteLine("Lesson Quota Updated....");
+                lessonProcess();
+            }
+            else
+            {
+                Console.WriteLine("You Entered Wrong Lesson Number..\n");
+                lessonProcess();
+            }
 
 
+
+
+        }
+
+        public void showStudentLesson()
+        {
+            int lessonId = Convert.ToInt32(readlineCem(14));
+            int removeId = -1;
+            int controledInt = idControl(Convert.ToString(lessonId));
+            if (controledInt > -1)
+            {
+                removeId = controledInt;
+            }
+            int LessonIndex = countLessons(removeId);
+
+            if (LessonIndex > 0)
+            {
+
+                try
+                {
+
+                    using (SqlConnection connection = new SqlConnection(connString))
+                    {
+                        SqlDataAdapter da = new SqlDataAdapter("SELECT Student_Info_Table.Student_Id, Student_Info_Table.Student_Name,Student_Info_Table.Student_Surname,Student_Info_Table.Student_Gender FROM Student_Info_Table LEFT JOIN StudentLessons ON Student_Info_Table.Student_Id = StudentLessons.Student_Id WHERE Lesson_Id ="+lessonId,connection);
+
+
+                        //Using Data Table
+                        DataTable dt = new DataTable();
+                        da.Fill(dt);
+                        //Using Data Table;
+                        Console.WriteLine("\n");
+                        Console.WriteLine("Id||Name||Surname||Gender\n");
+
+                        for (int i = 0; i < dt.Rows.Count; i++)
+                        {
+                            Console.WriteLine(dt.Rows[i]["Student_Id"].ToString() + " " + dt.Rows[i]["Student_Name"].ToString() + " " + dt.Rows[i]["Student_Surname"].ToString() + " " + dt.Rows[i]["Student_Gender"].ToString());
+                        }
+                        Console.WriteLine("-----------------------------");
+                    }
+
+                    Console.ReadLine();
+                    lessonProcess();
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine("OOPs, something went wrong.\n" + e);
+                }
+                Console.ReadKey();
+
+
+
+
+
+
+           
+
+            }
+
+        }
     }
-
 }
