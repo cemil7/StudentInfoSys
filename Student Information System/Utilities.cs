@@ -18,7 +18,6 @@ namespace Student_Information_System
         Lesson lesson = new Lesson();
         int process;
         int Lessonprocess;
-        int isEmpty;
         public void add()
         {
             Student student = new Student();
@@ -84,7 +83,9 @@ namespace Student_Information_System
                     //Using Data Table
                     DataTable dt = new DataTable();
                     da.Fill(dt);
-                    Console.WriteLine("Using Data Table");
+                    //Using Data Table;
+                    Console.WriteLine("Student List\n");
+                    Console.WriteLine("Id||Name||Surname||Gender\n");
 
                     for (int i = 0; i < dt.Rows.Count; i++)
                     {
@@ -308,7 +309,13 @@ namespace Student_Information_System
                     Console.WriteLine("Enter the Id of the Student You Want to Enroll in the Lesson: ");
                     break;
                 case 12:
-                    Console.WriteLine("Which Operation Do You Want To Do?.. \n 1-Adding the Student to the Lesson 2-Main Menu 3-Exit");
+                    Console.WriteLine("Which Operation Do You Want To Do?.. \n 1-Adding the Student to the Lesson 2-Deleting a Student from a Lesson 3-Main Menu 4-Exit");
+                    break;
+                case 13:
+                    Console.WriteLine("Enter the Id of the Student to be Deleted from the Lesson:");
+                        break;
+                case 14:
+                    Console.WriteLine("Enter the Lesson Id:");
                     break;
             }
             rValue = Console.ReadLine();
@@ -397,7 +404,7 @@ namespace Student_Information_System
                         int kota = Convert.ToInt32(dt.Rows[i]["Lesson_Quota"].ToString());
                         int dersAlanSayisi = quotaCount(Convert.ToInt32(dt.Rows[i]["Lesson_Id"].ToString()));
                         int sonuc = kota - dersAlanSayisi;
-                        
+
                         Console.WriteLine(dt.Rows[i]["Lesson_Id"].ToString() + "         " + sonuc + "              " + dt.Rows[i]["Lesson_Name"].ToString());
 
                     }
@@ -471,29 +478,34 @@ namespace Student_Information_System
             }
             else if (Lessonprocess == 2)
             {
-                processControl();
+                removeToLesson();
             }
             else if (Lessonprocess == 3)
             {
+                processControl();
+            }
+            else if (Lessonprocess == 4)
+            {
                 exit();
             }
+            
         }
 
 
         public void getLessonId()
-       
+
         {
             using (SqlConnection connection = new SqlConnection(connString))
             {
                 SqlDataAdapter da = new SqlDataAdapter("select Lesson_Name,Lesson_Id from Lesson_Table order by Lesson_Id", connection);
                 DataTable dt = new DataTable();
                 da.Fill(dt);
-                
+
                 for (int i = 0; i < dt.Rows.Count; i++)
                 {
                     Console.WriteLine(dt.Rows[i]["Lesson_Name"].ToString() + " " + dt.Rows[i]["Lesson_Id"].ToString());
                 }
-                
+
             }
 
 
@@ -501,6 +513,43 @@ namespace Student_Information_System
 
 
         }
+        public void removeToLesson() {
+            int studentId = Convert.ToInt32(readlineCem(13));
+            int lessonId = Convert.ToInt32(readlineCem(14));
+            int removeId = -1;
+            int controledInt = idControl(Convert.ToString(studentId));
+
+            if (controledInt > -1)
+            {
+                removeId = controledInt;
+            }
+            int studentIndex = countStudents(removeId);
+
+            if (studentIndex > 0)
+            {
+                conn = new SqlConnection(connString);
+                conn.Open();
+                cmd = new SqlCommand();
+                cmd.Connection = conn;
+                cmd.CommandText = "DELETE FROM StudentLessons WHERE STUDENT_ID=" + removeId + "AND Lesson_Id="+lessonId;
+                cmd.ExecuteNonQuery();
+                conn.Close();
+                Console.WriteLine("Student Deleted..");
+                lessonProcess();
+
+            }
+            else
+            {
+                Console.WriteLine("You Entered Wrong Student Number..\n");
+                lessonProcess();
+            }
+            Console.ReadLine();
+
+
+        }
+
+
+
     }
 
 }
