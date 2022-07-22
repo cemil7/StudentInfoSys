@@ -390,11 +390,16 @@ namespace Student_Information_System
 
                     DataTable dt = new DataTable();
                     da.Fill(dt);
-                    Console.WriteLine("Lessons List:");
-
+                    Console.WriteLine("Lessons List:\n");
+                    Console.WriteLine("Lesson Id|Remaining Quota|Lesson Name");
                     for (int i = 0; i < dt.Rows.Count; i++)
                     {
-                        Console.WriteLine(dt.Rows[i]["Lesson_Name"].ToString() + " " + dt.Rows[i]["Lesson_Id"].ToString() + " " + dt.Rows[i]["Lesson_Quota"].ToString());
+                        int kota = Convert.ToInt32(dt.Rows[i]["Lesson_Quota"].ToString());
+                        int dersAlanSayisi = quotaCount(Convert.ToInt32(dt.Rows[i]["Lesson_Id"].ToString()));
+                        int sonuc = kota - dersAlanSayisi;
+                        
+                        Console.WriteLine(dt.Rows[i]["Lesson_Id"].ToString() + "         " + sonuc + "              " + dt.Rows[i]["Lesson_Name"].ToString());
+
                     }
                     Console.WriteLine("-----------------------------");
                 }
@@ -424,6 +429,7 @@ namespace Student_Information_System
                 cmd.CommandText = "INSERT INTO StudentLessons( Student_Id, Lesson_Id) VALUES ('" + studentId + "','" + lessonId + "')";
                 cmd.ExecuteNonQuery();
                 conn.Close();
+                Console.WriteLine("Student Added..");
                 lessonProcess();
             }
             else
@@ -475,20 +481,11 @@ namespace Student_Information_System
 
 
         public void getLessonId()
-        //{
-        //    int id;
-        //    conn = new SqlConnection(connString);
-        //    conn.Open();
-        //    cmd = new SqlCommand();
-        //    cmd.Connection = conn;
-        //    cmd.CommandText = "SELECT Lesson_Id FROM Lesson_Table
-        //cmd.ExecuteNonQuery();
-        //conn.Close();
-        //}
+       
         {
             using (SqlConnection connection = new SqlConnection(connString))
             {
-                SqlDataAdapter da = new SqlDataAdapter("select Lesson_Name,Lesson_Id from Lesson_Table", connection);
+                SqlDataAdapter da = new SqlDataAdapter("select Lesson_Name,Lesson_Id from Lesson_Table order by Lesson_Id", connection);
                 DataTable dt = new DataTable();
                 da.Fill(dt);
                 
