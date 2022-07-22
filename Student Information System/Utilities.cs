@@ -15,17 +15,18 @@ namespace Student_Information_System
         SqlCommand cmd = null;
 
         public List<Student> students = new List<Student>();
+        Lesson lesson = new Lesson();
         int process;
+        int Lessonprocess;
+        int isEmpty;
         public void add()
         {
-
-
-
             Student student = new Student();
 
             student.name = readlineCem(1);
             student.surname = readlineCem(2);
             student.gender = readlineCem(4);
+
             dataAdd(student);
             processControl();
         }
@@ -79,6 +80,7 @@ namespace Student_Information_System
                 {
                     SqlDataAdapter da = new SqlDataAdapter("select * from Student_Info_Table", connection);
 
+
                     //Using Data Table
                     DataTable dt = new DataTable();
                     da.Fill(dt);
@@ -121,10 +123,7 @@ namespace Student_Information_System
         public void processControl()
         {
 
-
             string isProcessNull = readlineCem(8);
-
-
 
             if (isProcessNull != "")
             {
@@ -166,9 +165,12 @@ namespace Student_Information_System
             }
             else if (process == 5)
             {
+                showLesson();
+            }
+            else if (process == 6)
+            {
                 exit();
             }
-
 
             else
             {
@@ -292,13 +294,22 @@ namespace Student_Information_System
                     Console.WriteLine("There is a student at this number. Please try again");
                     break;
                 case 8:
-                    Console.WriteLine("Which Operation Do You Want To Do?.. \n 1-List 2-Add 3-Remove 4-Update 5-Exit \n\n");
+                    Console.WriteLine("Which Operation Do You Want To Do?.. \n 1-Student List 2-Add Student 3-Remove Student 4-Update Student 5-Lessons List 6-Exit \n\n");
                     break;
                 case 9:
                     Console.WriteLine("Wrong format.Try again.");
                     break;
+                case 10:
+                    Console.WriteLine("Enter the code of the student's lesson:  ");
+                    getLessonId();
+                    break;
 
-
+                case 11:
+                    Console.WriteLine("Enter the Id of the Student You Want to Enroll in the Lesson: ");
+                    break;
+                case 12:
+                    Console.WriteLine("Which Operation Do You Want To Do?.. \n 1-Adding the Student to the Lesson 2-Main Menu 3-Exit");
+                    break;
             }
             rValue = Console.ReadLine();
 
@@ -307,8 +318,6 @@ namespace Student_Information_System
 
                 rValue = readlineCem(round);
             }
-
-
 
             return rValue;
         }
@@ -333,6 +342,168 @@ namespace Student_Information_System
 
         }
 
+        public int quotaCount(int lessonId)
+        {
+            conn = new SqlConnection(connString);
+            conn.Open();
+            cmd = new SqlCommand();
+            cmd.Connection = conn;
+            cmd.CommandText = "select count(*)from StudentLessons where Lesson_Id =" + lessonId;
+            var countQ = cmd.ExecuteScalar();
+            conn.Close();
+            return Convert.ToInt32(countQ);
+
+        }
+        public int quotaControl(int lessonId)
+        {
+            int lessonQuota;
+            int lessonOccupancy = quotaCount(lessonId);
+            conn = new SqlConnection(connString);
+            conn.Open();
+            cmd = new SqlCommand();
+            cmd.Connection = conn;
+            cmd.CommandText = "select Lesson_Quota from Lesson_Table where Lesson_Id=" + lessonId;
+
+            lessonQuota = Convert.ToInt32(cmd.ExecuteScalar());
+            if (lessonQuota > lessonOccupancy)
+            {
+                return 1;
+            }
+            else
+            {
+                return 0;
+            }
+
+        }
+
+
+        public void showLesson()
+        {
+            try
+            {
+
+                using (SqlConnection connection = new SqlConnection(connString))
+                {
+                    SqlDataAdapter da = new SqlDataAdapter("select * from Lesson_Table", connection);
+
+
+
+                    DataTable dt = new DataTable();
+                    da.Fill(dt);
+                    Console.WriteLine("Lessons List:");
+
+                    for (int i = 0; i < dt.Rows.Count; i++)
+                    {
+                        Console.WriteLine(dt.Rows[i]["Lesson_Name"].ToString() + " " + dt.Rows[i]["Lesson_Id"].ToString() + " " + dt.Rows[i]["Lesson_Quota"].ToString());
+                    }
+                    Console.WriteLine("-----------------------------");
+                }
+
+
+                Console.WriteLine();
+
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("OOPs, something went wrong.\n" + e);
+            }
+
+            lessonProcess();
+        }
+
+        public void addToLesson()
+        {
+            int studentId = Convert.ToInt32(readlineCem(11));
+            int lessonId = Convert.ToInt32(readlineCem(10));
+            if (quotaControl(lessonId) == 1)
+            {
+                conn = new SqlConnection(connString);
+                conn.Open();
+                cmd = new SqlCommand();
+                cmd.Connection = conn;
+                cmd.CommandText = "INSERT INTO StudentLessons( Student_Id, Lesson_Id) VALUES ('" + studentId + "','" + lessonId + "')";
+                cmd.ExecuteNonQuery();
+                conn.Close();
+                lessonProcess();
+            }
+            else
+            {
+                Console.WriteLine("There is no quota left in the lesson.");
+                Console.WriteLine();
+                lessonProcess();
+            }
+
+
+        }
+
+        public void lessonProcess()
+        {
+            string isProcessNull = readlineCem(12);
+
+            if (isProcessNull != "")
+            {
+                bool tryParse = Int32.TryParse(isProcessNull, out Lessonprocess);
+                if (tryParse)
+                {
+
+                }
+                else
+                {
+                    Console.WriteLine("Wrong format. Try again");
+                }
+
+
+            }
+            else
+            {
+                Lessonprocess = 0;
+            }
+
+            if (Lessonprocess == 1)
+            {
+                addToLesson();
+            }
+            else if (Lessonprocess == 2)
+            {
+                processControl();
+            }
+            else if (Lessonprocess == 3)
+            {
+                exit();
+            }
+        }
+
+
+        public void getLessonId()
+        //{
+        //    int id;
+        //    conn = new SqlConnection(connString);
+        //    conn.Open();
+        //    cmd = new SqlCommand();
+        //    cmd.Connection = conn;
+        //    cmd.CommandText = "SELECT Lesson_Id FROM Lesson_Table
+        //cmd.ExecuteNonQuery();
+        //conn.Close();
+        //}
+        {
+            using (SqlConnection connection = new SqlConnection(connString))
+            {
+                SqlDataAdapter da = new SqlDataAdapter("select Lesson_Name,Lesson_Id from Lesson_Table", connection);
+                DataTable dt = new DataTable();
+                da.Fill(dt);
+                
+                for (int i = 0; i < dt.Rows.Count; i++)
+                {
+                    Console.WriteLine(dt.Rows[i]["Lesson_Name"].ToString() + " " + dt.Rows[i]["Lesson_Id"].ToString());
+                }
+                
+            }
+
+
+            Console.WriteLine();
+
+
+        }
     }
 
 }
