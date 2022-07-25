@@ -14,7 +14,6 @@ namespace Student_Information_System
     public partial class GetDatabase
     {
         SqlConnection connection;
-        SqlCommand cmd;
         SqlDataAdapter da;
         public void getInfos()
         {

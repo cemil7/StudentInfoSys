@@ -20,7 +20,7 @@ namespace Student_Information_System
         public void add()
         {
             Student student = new Student();
-            
+
             student.name = readlineCem(1);
             student.surname = readlineCem(2);
             student.gender = readlineCem(4);
@@ -90,7 +90,7 @@ namespace Student_Information_System
                 Console.WriteLine();
                 numberofStudents();
 
-                addObject();
+                getStudent();
                 processControl();
 
             }
@@ -229,7 +229,7 @@ namespace Student_Information_System
                 conn.Open();
                 cmd = new SqlCommand();
                 cmd.Connection = conn;
-                
+
                 cmd.CommandText = "UPDATE STUDENT_INFO_TABLE SET Student_Name = '" + student.name + "', " + " Student_Surname = '" + student.surname + "', " + " Student_Gender = '" + student.gender + "' WHERE Student_Id= " + removeId;
                 cmd.ExecuteNonQuery();
                 conn.Close();
@@ -329,7 +329,7 @@ namespace Student_Information_System
 
             return rValue;
         }
-        public void addObject()
+        public void getStudent()
         {
             students.Clear();
             SqlConnection conn = new SqlConnection(connString);
@@ -587,55 +587,67 @@ namespace Student_Information_System
         }
         public void showStudentLesson()
         {
-            int lessonId = Convert.ToInt32(readlineCem(14));
+            string lessonId = (readlineCem(14));
             int removeId = -1;
-            int controledInt = idControl(Convert.ToString(lessonId));
-            if (controledInt > -1)
+            if (lessonId != "")
             {
-                removeId = controledInt;
-            }
-            int LessonIndex = countLessons(removeId);
-
-            if (LessonIndex > 0)
-            {
-
-                try
+                bool tryParse = Int32.TryParse(lessonId, out Lessonprocess);
+                if (tryParse)
                 {
 
-                    using (SqlConnection connection = new SqlConnection(connString))
+                }
+                else
+                {
+                    Console.WriteLine("Wrong format. Try again");
+                }
+                int controledInt = idControl(Convert.ToString(lessonId));
+                if (controledInt > -1)
+                {
+                    removeId = controledInt;
+                }
+                int LessonIndex = countLessons(removeId);
+
+                if (LessonIndex > 0)
+                {
+
+                    try
                     {
-                        SqlDataAdapter da = new SqlDataAdapter("SELECT Student_Info_Table.Student_Id, Student_Info_Table.Student_Name,Student_Info_Table.Student_Surname,Student_Info_Table.Student_Gender FROM Student_Info_Table LEFT JOIN StudentLessons ON Student_Info_Table.Student_Id = StudentLessons.Student_Id WHERE Lesson_Id ="+lessonId,connection);
 
-
-                        //Using Data Table
-                        DataTable dt = new DataTable();
-                        da.Fill(dt);
-                        //Using Data Table;
-                        Console.WriteLine("\n");
-                        Console.WriteLine("Id||Name||Surname||Gender\n");
-
-                        for (int i = 0; i < dt.Rows.Count; i++)
+                        using (SqlConnection connection = new SqlConnection(connString))
                         {
-                            Console.WriteLine(dt.Rows[i]["Student_Id"].ToString() + " " + dt.Rows[i]["Student_Name"].ToString() + " " + dt.Rows[i]["Student_Surname"].ToString() + " " + dt.Rows[i]["Student_Gender"].ToString());
+                            SqlDataAdapter da = new SqlDataAdapter("SELECT Student_Info_Table.Student_Id, Student_Info_Table.Student_Name,Student_Info_Table.Student_Surname,Student_Info_Table.Student_Gender FROM Student_Info_Table LEFT JOIN StudentLessons ON Student_Info_Table.Student_Id = StudentLessons.Student_Id WHERE Lesson_Id =" + lessonId, connection);
+
+
+                            //Using Data Table
+                            DataTable dt = new DataTable();
+                            da.Fill(dt);
+                            //Using Data Table;
+                            Console.WriteLine("\n");
+                            Console.WriteLine("Id||Name||Surname||Gender\n");
+
+                            for (int i = 0; i < dt.Rows.Count; i++)
+                            {
+                                Console.WriteLine(dt.Rows[i]["Student_Id"].ToString() + " " + dt.Rows[i]["Student_Name"].ToString() + " " + dt.Rows[i]["Student_Surname"].ToString() + " " + dt.Rows[i]["Student_Gender"].ToString());
+                            }
+                            Console.WriteLine("-----------------------------\n");
                         }
-                        Console.WriteLine("-----------------------------");
+
+                        
+                        lessonProcess();
+
                     }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine("OOPs, something went wrong.\n" + e);
+                    }
+                    Console.ReadKey();
 
-                    Console.ReadLine();
-                    lessonProcess();
-                   
                 }
-                catch (Exception e)
+                else
                 {
-                    Console.WriteLine("OOPs, something went wrong.\n" + e);
+                    Console.WriteLine("\nThis student is not enrolled in any lesson.\n");
+                    lessonProcess();
                 }
-                Console.ReadKey();
-
-            }
-            else
-            {
-                Console.WriteLine("\nThis student is not enrolled in any course.\n");
-                lessonProcess();
             }
         }
     }

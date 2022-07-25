@@ -14,7 +14,7 @@ namespace Student_Information_System
         static void Main(string[] args)
         {
             Utilities utilities = new Utilities();
-            utilities.addObject();
+            utilities.getStudent();
             utilities.processControl();
         }
     }
