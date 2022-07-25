@@ -62,7 +62,6 @@ namespace Student_Information_System
         }
         public int exit()
         {
-
             return -1;
         }
         public void show()
@@ -557,7 +556,6 @@ namespace Student_Information_System
 
 
         }
-
         public void uptadeLessonQuota()
         {
 
@@ -594,7 +592,6 @@ namespace Student_Information_System
 
 
         }
-
         public void showStudentLesson()
         {
             int lessonId = Convert.ToInt32(readlineCem(14));
@@ -633,6 +630,7 @@ namespace Student_Information_System
 
                     Console.ReadLine();
                     lessonProcess();
+                   
                 }
                 catch (Exception e)
                 {
@@ -640,15 +638,12 @@ namespace Student_Information_System
                 }
                 Console.ReadKey();
 
-
-
-
-
-
-           
-
             }
-
+            else
+            {
+                Console.WriteLine("\nThis student is not enrolled in any course.\n");
+                lessonProcess();
+            }
         }
     }
 }
