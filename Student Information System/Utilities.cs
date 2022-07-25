@@ -20,7 +20,7 @@ namespace Student_Information_System
         public void add()
         {
             Student student = new Student();
-
+            
             student.name = readlineCem(1);
             student.surname = readlineCem(2);
             student.gender = readlineCem(4);
@@ -34,7 +34,6 @@ namespace Student_Information_System
             int removeId = -1;
             string IdString = readlineCem(5);
             int controledInt = idControl(IdString);
-
 
             if (controledInt > -1)
             {
@@ -131,14 +130,11 @@ namespace Student_Information_System
                     Console.WriteLine("Wrong format. Try again");
                 }
 
-
             }
             else
             {
                 process = 0;
             }
-
-
 
             if (process == 1)
             {
@@ -198,7 +194,6 @@ namespace Student_Information_System
             conn.Close();
             return Convert.ToInt32(count);
 
-
         }
         public int countLessons(int countLesson)
         {
@@ -234,9 +229,7 @@ namespace Student_Information_System
                 conn.Open();
                 cmd = new SqlCommand();
                 cmd.Connection = conn;
-
-
-
+                
                 cmd.CommandText = "UPDATE STUDENT_INFO_TABLE SET Student_Name = '" + student.name + "', " + " Student_Surname = '" + student.surname + "', " + " Student_Gender = '" + student.gender + "' WHERE Student_Id= " + removeId;
                 cmd.ExecuteNonQuery();
                 conn.Close();
