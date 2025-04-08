@@ -11,5 +11,6 @@ namespace Student_Information_System
         public int lessonId { get; set; }
         public string lessonName { get; set; }
         public int quota { get; set; }
+        kj
     }
 }
